@@ -16,6 +16,7 @@ import Rooms from "./pages/Rooms";
 import Reservations from "./pages/Reservations";
 import CalendarPage from "./pages/CalendarPage";
 import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
 
 // Composant pour protéger les routes
 const PrivateRoute = ({ children }) => {
@@ -142,6 +143,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <PrivateRoute>
+                <Admin />
               </PrivateRoute>
             }
           />
