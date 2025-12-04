@@ -13,23 +13,22 @@ const app = express();
 // Sécurité : Headers HTTP
 app.use(helmet());
 
-// Sécurité : Rate limiting (100 requêtes par 15 minutes)
+// Sécurité : Rate limiting (1000 requêtes par 15 minutes)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 1000,
   message: { message: "Trop de requêtes, veuillez réessayer plus tard." },
 });
 app.use(limiter);
 
-// Rate limiting strict pour l'authentification (5 tentatives par 15 min)
+// Rate limiting strict pour l'authentification (20 tentatives par 15 min)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 20,
   message: {
     message: "Trop de tentatives de connexion, veuillez réessayer plus tard.",
   },
 });
-
 // Middlewares
 app.use(cors());
 app.use(express.json({ limit: "10kb" })); // Limite la taille des requêtes
