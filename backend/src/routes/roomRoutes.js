@@ -4,6 +4,12 @@ const roomController = require("../controllers/roomController");
 const { authMiddleware, adminMiddleware } = require("../middlewares/auth");
 const { validateRoom } = require("../middlewares/validator");
 
+// Récupérer les types de salles (authentifié)
+router.get("/types", authMiddleware, roomController.getTypes);
+
+// Récupérer les équipements (authentifié)
+router.get("/equipments", authMiddleware, roomController.getEquipments);
+
 // Récupérer toutes les salles (authentifié)
 router.get("/", authMiddleware, roomController.getAll);
 
@@ -30,5 +36,21 @@ router.put(
 
 // Supprimer une salle (admin uniquement)
 router.delete("/:id", authMiddleware, adminMiddleware, roomController.delete);
+
+// Ajouter un équipement à une salle (admin uniquement)
+router.post(
+  "/:id/equipments",
+  authMiddleware,
+  adminMiddleware,
+  roomController.addEquipment
+);
+
+// Supprimer un équipement d'une salle (admin uniquement)
+router.delete(
+  "/:id/equipments/:equipmentId",
+  authMiddleware,
+  adminMiddleware,
+  roomController.removeEquipment
+);
 
 module.exports = router;
