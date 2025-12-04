@@ -64,7 +64,20 @@ describe("Tests Salles", () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toBe("Le nom et la capacité sont requis");
+      expect(response.body.message).toBe("Données invalides");
+    });
+
+    it("devrait refuser une capacité invalide", async () => {
+      const response = await request(app)
+        .post("/api/rooms")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({
+          name: "Salle Test",
+          capacity: -5,
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe("Données invalides");
     });
   });
 

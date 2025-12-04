@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const reservationController = require("../controllers/reservationController");
 const { authMiddleware } = require("../middlewares/auth");
+const { validateReservation } = require("../middlewares/validator");
 
 // Récupérer toutes les réservations (authentifié)
 router.get("/", authMiddleware, reservationController.getAll);
@@ -13,7 +14,12 @@ router.get("/my", authMiddleware, reservationController.getMyReservations);
 router.get("/room/:roomId", authMiddleware, reservationController.getByRoom);
 
 // Créer une réservation (authentifié)
-router.post("/", authMiddleware, reservationController.create);
+router.post(
+  "/",
+  authMiddleware,
+  validateReservation,
+  reservationController.create
+);
 
 // Supprimer une réservation (authentifié)
 router.delete("/:id", authMiddleware, reservationController.delete);
