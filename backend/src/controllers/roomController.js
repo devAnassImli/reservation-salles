@@ -1,4 +1,5 @@
 const Room = require('../models/Room');
+const { securityLogger } = require('../config/logger');
 
 const roomController = {
     // Créer une salle (admin uniquement)
@@ -11,6 +12,9 @@ const roomController = {
             }
 
             const room = await Room.create(name, capacity, equipment);
+            
+            securityLogger.adminAction(req.user.id, 'CREATE_ROOM', { roomId: room.id, name });
+
             res.status(201).json({
                 message: 'Salle créée avec succès',
                 room
@@ -58,6 +62,8 @@ const roomController = {
                 return res.status(404).json({ message: 'Salle non trouvée' });
             }
 
+            securityLogger.adminAction(req.user.id, 'UPDATE_ROOM', { roomId: id, name });
+
             res.json({
                 message: 'Salle mise à jour avec succès',
                 room
@@ -76,6 +82,8 @@ const roomController = {
             if (!room) {
                 return res.status(404).json({ message: 'Salle non trouvée' });
             }
+
+            securityLogger.adminAction(req.user.id, 'DELETE_ROOM', { roomId: id });
 
             res.json({ message: 'Salle supprimée avec succès' });
         } catch (error) {

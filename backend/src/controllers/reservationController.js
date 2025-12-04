@@ -1,5 +1,6 @@
 const Reservation = require("../models/Reservation");
 const Room = require("../models/Room");
+const { securityLogger } = require("../config/logger");
 
 const reservationController = {
   // Créer une réservation
@@ -21,6 +22,9 @@ const reservationController = {
         endTime
       );
       if (hasConflict) {
+        securityLogger.validationError(req.ip, "/api/reservations", [
+          "Conflit de réservation",
+        ]);
         return res
           .status(409)
           .json({ message: "Cette salle est déjà réservée sur ce créneau" });
@@ -33,6 +37,9 @@ const reservationController = {
         endTime,
         title
       );
+
+      securityLogger.reservationCreated(userId, roomId, startTime, endTime);
+
       res.status(201).json({
         message: "Réservation créée avec succès",
         reservation,
@@ -89,12 +96,20 @@ const reservationController = {
 
       // Vérifier les droits (propriétaire ou admin)
       if (reservation.user_id !== userId && userRole !== "admin") {
+        securityLogger.unauthorizedAccess(
+          req.ip,
+          `/api/reservations/${id}`,
+          "Tentative de suppression non autorisée"
+        );
         return res
           .status(403)
           .json({ message: "Vous ne pouvez pas supprimer cette réservation" });
       }
 
       await Reservation.delete(id);
+
+      securityLogger.reservationDeleted(userId, id);
+
       res.json({ message: "Réservation supprimée avec succès" });
     } catch (error) {
       res.status(500).json({ message: "Erreur serveur", error: error.message });
