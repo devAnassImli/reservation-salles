@@ -9,6 +9,20 @@ import {
 } from "../services/api";
 import { toast } from "react-toastify";
 import { Navigate } from "react-router-dom";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+} from "recharts";
 
 const Admin = () => {
   const { isAdmin } = useAuth();
@@ -353,68 +367,217 @@ const Admin = () => {
         <div className="p-6">
           {/* Overview Tab */}
           {activeTab === "overview" && (
-            <div className="space-y-6">
+            <div className="space-y-8">
+              {/* Graphiques */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Graphique réservations par jour */}
+                <div className="bg-gray-50 rounded-2xl p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Réservations cette semaine
+                  </h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart
+                      data={(() => {
+                        const days = [
+                          "Dim",
+                          "Lun",
+                          "Mar",
+                          "Mer",
+                          "Jeu",
+                          "Ven",
+                          "Sam",
+                        ];
+                        const today = new Date();
+                        const weekData = [];
+                        for (let i = 6; i >= 0; i--) {
+                          const date = new Date(today);
+                          date.setDate(date.getDate() - i);
+                          const dayReservations = allReservations.filter(
+                            (r) => {
+                              const resDate = new Date(r.start_time);
+                              return (
+                                resDate.toDateString() === date.toDateString()
+                              );
+                            }
+                          ).length;
+                          weekData.push({
+                            name: days[date.getDay()],
+                            reservations: dayReservations,
+                          });
+                        }
+                        return weekData;
+                      })()}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis dataKey="name" stroke="#6b7280" />
+                      <YAxis stroke="#6b7280" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#fff",
+                          border: "1px solid #e5e7eb",
+                          borderRadius: "12px",
+                        }}
+                      />
+                      <Bar
+                        dataKey="reservations"
+                        fill="#3b82f6"
+                        radius={[8, 8, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Graphique répartition par salle */}
+                <div className="bg-gray-50 rounded-2xl p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Répartition par salle
+                  </h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie
+                        data={rooms
+                          .map((room) => ({
+                            name: room.name,
+                            value: allReservations.filter(
+                              (r) => r.room_name === room.name
+                            ).length,
+                          }))
+                          .filter((r) => r.value > 0)}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        dataKey="value"
+                        label={({ name, percent }) =>
+                          `${name} (${(percent * 100).toFixed(0)}%)`
+                        }
+                      >
+                        {rooms.map((_, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={
+                              [
+                                "#3b82f6",
+                                "#10b981",
+                                "#8b5cf6",
+                                "#f59e0b",
+                                "#ef4444",
+                                "#06b6d4",
+                              ][index % 6]
+                            }
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Activité récente */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Activité récente
                 </h3>
-                {allReservations.slice(0, 5).map((reservation) => (
-                  <div
-                    key={reservation.id}
-                    className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <svg
-                          className="w-5 h-5 text-blue-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
+                {allReservations.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">
+                    Aucune activité récente
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {allReservations.slice(0, 5).map((reservation) => (
+                      <div
+                        key={reservation.id}
+                        className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-xl"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <svg
+                              className="w-5 h-5 text-blue-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">
+                              {reservation.title}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {reservation.room_name} • {reservation.user_name}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-sm text-gray-500">
+                          {new Date(reservation.start_time).toLocaleDateString(
+                            "fr-FR"
+                          )}
+                        </span>
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {reservation.title}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {reservation.room_name} • {reservation.user_name}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-500">
-                      {new Date(reservation.start_time).toLocaleDateString(
-                        "fr-FR"
-                      )}
-                    </span>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
 
+              {/* Salles les plus utilisées */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Salles les plus utilisées
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {rooms.slice(0, 3).map((room) => {
+                  {rooms.slice(0, 3).map((room, index) => {
                     const roomReservations = allReservations.filter(
                       (r) => r.room_name === room.name
                     );
+                    const percentage =
+                      allReservations.length > 0
+                        ? Math.round(
+                            (roomReservations.length / allReservations.length) *
+                              100
+                          )
+                        : 0;
                     return (
                       <div key={room.id} className="bg-gray-50 rounded-xl p-4">
-                        <h4 className="font-medium text-gray-900">
-                          {room.name}
-                        </h4>
-                        <p className="text-2xl font-bold text-blue-600 mt-1">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-medium text-gray-900">
+                            {room.name}
+                          </h4>
+                          <span
+                            className={`text-lg font-bold ${
+                              index === 0
+                                ? "text-blue-600"
+                                : index === 1
+                                ? "text-emerald-600"
+                                : "text-purple-600"
+                            }`}
+                          >
+                            #{index + 1}
+                          </span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-900">
                           {roomReservations.length}
                         </p>
-                        <p className="text-sm text-gray-500">réservations</p>
+                        <p className="text-sm text-gray-500">
+                          réservations ({percentage}%)
+                        </p>
+                        <div className="mt-3 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${
+                              index === 0
+                                ? "bg-blue-500"
+                                : index === 1
+                                ? "bg-emerald-500"
+                                : "bg-purple-500"
+                            }`}
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
                       </div>
                     );
                   })}
