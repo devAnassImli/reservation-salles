@@ -17,6 +17,8 @@ import Reservations from "./pages/Reservations";
 import CalendarPage from "./pages/CalendarPage";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
+import Users from "./pages/Users";
+import Home from "./pages/Home";
 
 // Composant pour protéger les routes
 const PrivateRoute = ({ children }) => {
@@ -89,7 +91,7 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="/" element={<Home />} />
           <Route
             path="/login"
             element={
@@ -151,6 +153,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Admin />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <PrivateRoute>
+                <Users />
               </PrivateRoute>
             }
           />
