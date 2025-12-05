@@ -2,6 +2,7 @@ const pool = require("../config/db");
 
 class Room {
   // Créer une nouvelle salle
+  // Créer une nouvelle salle
   static async create(
     name,
     capacity,
@@ -11,17 +12,20 @@ class Room {
     building = null
   ) {
     const result = await pool.query(
-      `INSERT INTO rooms (name, capacity, room_type_id, floor, building, description) 
+      `INSERT INTO rooms (name, capacity, description, room_type_id, floor, building) 
              VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [name, capacity, roomTypeId, floor, building, equipment]
+      [name, capacity, equipment, roomTypeId, floor, building]
     );
     return result.rows[0];
   }
 
   // Récupérer toutes les salles avec leurs types
+  // Récupérer toutes les salles avec leurs types
   static async findAll() {
     const result = await pool.query(`
-            SELECT r.*, rt.name as type_name, rt.color as type_color
+            SELECT r.id, r.name, r.capacity, r.description as equipment, r.floor, r.building, 
+                   r.room_type_id, r.is_active, r.image_url, r.created_at,
+                   rt.name as type_name, rt.color as type_color
             FROM rooms r
             LEFT JOIN room_types rt ON r.room_type_id = rt.id
             WHERE r.is_active = true

@@ -108,8 +108,12 @@ const Reservations = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Mes Réservations</h1>
-          <p className="text-gray-500 mt-1">Gérez vos réservations de salles</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Mes Réservations
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
+            Gérez vos réservations de salles
+          </p>
         </div>
         <button
           onClick={() => setShowModal(true)}

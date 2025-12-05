@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import NotificationBell from "./NotificationBell";
+import ThemeToggle from "./ThemeToggle";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -154,9 +155,9 @@ const Sidebar = () => {
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 z-40">
+    <aside className="fixed left-0 top-0 h-screen w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-40 transition-colors duration-200">
       {/* Logo */}
-      <div className="flex items-center space-x-3 px-6 py-5 border-b border-gray-200">
+      <div className="flex items-center space-x-3 px-6 py-5 border-b border-gray-200 dark:border-gray-700">
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-xl">
           <svg
             className="w-6 h-6 text-white"
@@ -172,12 +173,14 @@ const Sidebar = () => {
             />
           </svg>
         </div>
-        <span className="text-xl font-bold text-gray-900">RoomBook</span>
+        <span className="text-xl font-bold text-gray-900 dark:text-white">
+          RoomBook
+        </span>
       </div>
 
       {/* User info */}
 
-      <div className="px-6 py-4 border-b border-gray-200">
+      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
@@ -186,11 +189,18 @@ const Sidebar = () => {
               </span>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-              <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                {user?.name}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                {user?.role}
+              </p>
             </div>
           </div>
-          <NotificationBell />
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
+            <NotificationBell />
+          </div>
         </div>
       </div>
 
@@ -206,7 +216,7 @@ const Sidebar = () => {
                   className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                     isActive
                       ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
-                      : "text-gray-600 hover:bg-gray-100"
+                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   }`}
                 >
                   {item.icon}
@@ -219,7 +229,7 @@ const Sidebar = () => {
       </nav>
 
       {/* Logout button */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
         <Link
           to="/login"
           onClick={() => {

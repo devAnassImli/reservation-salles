@@ -110,8 +110,10 @@ const Users = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Utilisateurs</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Utilisateurs
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
             Gérez les utilisateurs de l'application
           </p>
         </div>

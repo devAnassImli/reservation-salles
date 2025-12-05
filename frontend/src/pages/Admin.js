@@ -167,8 +167,12 @@ const Admin = () => {
             </svg>
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Administration</h1>
-            <p className="text-gray-500">Gérez l'ensemble de l'application</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Administration
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400">
+              Gérez l'ensemble de l'application
+            </p>
           </div>
         </div>
       </div>
@@ -849,20 +853,20 @@ const Admin = () => {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-gray-50">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-600">
+                  <tr className="bg-gray-50 dark:bg-gray-700">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">
                       Date
                     </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-600">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">
                       Utilisateur
                     </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-600">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">
                       Action
                     </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-600">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">
                       Entité
                     </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-600">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-600 dark:text-gray-300">
                       IP
                     </th>
                   </tr>
@@ -871,12 +875,12 @@ const Admin = () => {
                   {auditLogs.map((log) => (
                     <tr
                       key={log.id}
-                      className="border-b border-gray-100 hover:bg-gray-50"
+                      className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
-                      <td className="py-3 px-4 text-sm text-gray-600">
+                      <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-300">
                         {new Date(log.created_at).toLocaleString("fr-FR")}
                       </td>
-                      <td className="py-3 px-4 text-sm font-medium text-gray-900">
+                      <td className="py-3 px-4 text-sm font-medium text-gray-900 dark:text-white">
                         {log.user_name || "Système"}
                       </td>
                       <td className="py-3 px-4">
@@ -894,10 +898,10 @@ const Admin = () => {
                           {log.action}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-sm text-gray-600">
+                      <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-300">
                         {log.entity_type} #{log.entity_id}
                       </td>
-                      <td className="py-3 px-4 text-sm text-gray-500">
+                      <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-300">
                         {log.ip_address || "-"}
                       </td>
                     </tr>
