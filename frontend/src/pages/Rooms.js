@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
-import { roomService } from "../services/api";
+import { roomService, reservationService } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 
@@ -10,6 +10,7 @@ const Rooms = () => {
   const [filteredRooms, setFilteredRooms] = useState([]);
   const [roomTypes, setRoomTypes] = useState([]);
   const [equipments, setEquipments] = useState([]);
+  const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
@@ -35,19 +36,31 @@ const Rooms = () => {
 
   const loadData = async () => {
     try {
-      const [roomsRes, typesRes, equipmentsRes] = await Promise.all([
-        roomService.getAll(),
-        roomService.getTypes(),
-        roomService.getEquipments(),
-      ]);
+      const [roomsRes, typesRes, equipmentsRes, reservationsRes] =
+        await Promise.all([
+          roomService.getAll(),
+          roomService.getTypes(),
+          roomService.getEquipments(),
+          reservationService.getAll(),
+        ]);
       setRooms(roomsRes.data);
       setRoomTypes(typesRes.data);
       setEquipments(equipmentsRes.data);
+      setReservations(reservationsRes.data);
     } catch (error) {
       toast.error("Erreur lors du chargement des salles");
     } finally {
       setLoading(false);
     }
+  };
+  const isRoomAvailable = (roomId) => {
+    const now = new Date();
+    return !reservations.some(
+      (r) =>
+        r.room_id === roomId &&
+        new Date(r.start_time) <= now &&
+        new Date(r.end_time) >= now
+    );
   };
 
   const applyFilters = () => {
@@ -335,10 +348,21 @@ const Rooms = () => {
                     />
                   </svg>
                 </div>
-                <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                  <span className="text-white text-sm font-medium">
-                    {room.capacity} pers.
-                  </span>
+                <div className="absolute top-4 right-4 flex items-center space-x-2">
+                  <div
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      isRoomAvailable(room.id)
+                        ? "bg-green-500 text-white"
+                        : "bg-red-500 text-white"
+                    }`}
+                  >
+                    {isRoomAvailable(room.id) ? "Disponible" : "Occupée"}
+                  </div>
+                  <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                    <span className="text-white text-sm font-medium">
+                      {room.capacity} pers.
+                    </span>
+                  </div>
                 </div>
                 {room.type_name && (
                   <div className="absolute top-4 left-4">

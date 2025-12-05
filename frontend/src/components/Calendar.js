@@ -32,7 +32,12 @@ const messages = {
   showMore: (total) => `+ ${total} de plus`,
 };
 
-const Calendar = ({ reservations, onSelectEvent }) => {
+const Calendar = ({
+  reservations,
+  onSelectEvent,
+  onSelectSlot,
+  selectable = false,
+}) => {
   const events = reservations.map((reservation) => ({
     id: reservation.id,
     title: `${reservation.title} - ${reservation.room_name}`,
@@ -252,6 +257,8 @@ const Calendar = ({ reservations, onSelectEvent }) => {
         onSelectEvent={(event) =>
           onSelectEvent && onSelectEvent(event.resource)
         }
+        onSelectSlot={(slotInfo) => onSelectSlot && onSelectSlot(slotInfo)}
+        selectable={selectable}
         views={["month", "week", "day", "agenda"]}
         defaultView="month"
       />

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import { reservationService, roomService } from "../services/api";
 import { toast } from "react-toastify";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const Reservations = () => {
   const [reservations, setReservations] = useState([]);
@@ -32,6 +34,80 @@ const Reservations = () => {
     } finally {
       setLoading(false);
     }
+  };
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+
+    // Titre
+    doc.setFontSize(20);
+    doc.setTextColor(59, 130, 246);
+    doc.text("Mes Réservations", 14, 22);
+
+    // Date d'export
+    doc.setFontSize(10);
+    doc.setTextColor(107, 114, 128);
+    doc.text(
+      `Exporté le ${new Date().toLocaleDateString(
+        "fr-FR"
+      )} à ${new Date().toLocaleTimeString("fr-FR")}`,
+      14,
+      30
+    );
+
+    // Tableau
+    const tableData = reservations.map((r) => [
+      r.title,
+      r.room_name,
+      new Date(r.start_time).toLocaleDateString("fr-FR"),
+      `${new Date(r.start_time).toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })} - ${new Date(r.end_time).toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`,
+      new Date(r.end_time) < new Date()
+        ? "Terminée"
+        : new Date(r.start_time) <= new Date()
+        ? "En cours"
+        : "À venir",
+    ]);
+
+    autoTable(doc, {
+      startY: 40,
+      head: [["Titre", "Salle", "Date", "Horaire", "Statut"]],
+      body: tableData,
+      theme: "striped",
+      headStyles: {
+        fillColor: [59, 130, 246],
+        textColor: 255,
+        fontStyle: "bold",
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+      },
+      alternateRowStyles: {
+        fillColor: [249, 250, 251],
+      },
+    });
+
+    // Pied de page
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(156, 163, 175);
+      doc.text(
+        `RoomBook - Page ${i} sur ${pageCount}`,
+        doc.internal.pageSize.width / 2,
+        doc.internal.pageSize.height - 10,
+        { align: "center" }
+      );
+    }
+
+    doc.save(`reservations_${new Date().toISOString().split("T")[0]}.pdf`);
+    toast.success("PDF exporté avec succès");
   };
 
   const handleSubmit = async (e) => {
@@ -115,6 +191,25 @@ const Reservations = () => {
             Gérez vos réservations de salles
           </p>
         </div>
+        <button
+          onClick={handleExportPDF}
+          className="flex items-center space-x-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-5 py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 mr-3"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+          <span className="font-medium">Export PDF</span>
+        </button>
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 transform hover:scale-105 shadow-lg shadow-blue-500/25"
