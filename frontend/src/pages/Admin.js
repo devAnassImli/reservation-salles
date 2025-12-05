@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
-import { roomService, reservationService } from "../services/api";
+import {
+  roomService,
+  reservationService,
+  auditService,
+  departmentService,
+} from "../services/api";
 import { toast } from "react-toastify";
 import { Navigate } from "react-router-dom";
 
@@ -15,6 +20,10 @@ const Admin = () => {
   });
   const [allReservations, setAllReservations] = useState([]);
   const [rooms, setRooms] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [auditLogs, setAuditLogs] = useState([]);
+  const [roomTypes, setRoomTypes] = useState([]);
+  const [equipments, setEquipments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -26,9 +35,20 @@ const Admin = () => {
 
   const loadData = async () => {
     try {
-      const [roomsRes, reservationsRes] = await Promise.all([
+      const [
+        roomsRes,
+        reservationsRes,
+        departmentsRes,
+        auditRes,
+        typesRes,
+        equipmentsRes,
+      ] = await Promise.all([
         roomService.getAll(),
         reservationService.getAll(),
+        departmentService.getAll(),
+        auditService.getAll(20, 0),
+        roomService.getTypes(),
+        roomService.getEquipments(),
       ]);
 
       const rooms = roomsRes.data;
@@ -45,6 +65,10 @@ const Admin = () => {
 
       setRooms(rooms);
       setAllReservations(reservations);
+      setDepartments(departmentsRes.data);
+      setAuditLogs(auditRes.data);
+      setRoomTypes(typesRes.data);
+      setEquipments(equipmentsRes.data);
       setStats({
         totalRooms: rooms.length,
         totalReservations: reservations.length,
@@ -252,10 +276,10 @@ const Admin = () => {
       {/* Tabs */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="border-b border-gray-100">
-          <nav className="flex">
+          <nav className="flex overflow-x-auto">
             <button
               onClick={() => setActiveTab("overview")}
-              className={`px-6 py-4 text-sm font-medium transition-colors ${
+              className={`px-6 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === "overview"
                   ? "text-blue-600 border-b-2 border-blue-600"
                   : "text-gray-500 hover:text-gray-700"
@@ -265,23 +289,63 @@ const Admin = () => {
             </button>
             <button
               onClick={() => setActiveTab("reservations")}
-              className={`px-6 py-4 text-sm font-medium transition-colors ${
+              className={`px-6 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === "reservations"
                   ? "text-blue-600 border-b-2 border-blue-600"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              Toutes les réservations
+              Réservations
             </button>
             <button
               onClick={() => setActiveTab("rooms")}
-              className={`px-6 py-4 text-sm font-medium transition-colors ${
+              className={`px-6 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === "rooms"
                   ? "text-blue-600 border-b-2 border-blue-600"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              Gestion des salles
+              Salles
+            </button>
+            <button
+              onClick={() => setActiveTab("departments")}
+              className={`px-6 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
+                activeTab === "departments"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Départements
+            </button>
+            <button
+              onClick={() => setActiveTab("roomTypes")}
+              className={`px-6 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
+                activeTab === "roomTypes"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Types de salles
+            </button>
+            <button
+              onClick={() => setActiveTab("equipments")}
+              className={`px-6 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
+                activeTab === "equipments"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Équipements
+            </button>
+            <button
+              onClick={() => setActiveTab("audit")}
+              className={`px-6 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
+                activeTab === "audit"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Logs d'audit
             </button>
           </nav>
         </div>
@@ -488,6 +552,199 @@ const Admin = () => {
           )}
         </div>
       </div>
+      {/* Departments Tab */}
+      {activeTab === "departments" && (
+        <div>
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Départements
+            </h3>
+            <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
+              {departments.length} départements
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {departments.map((dept) => (
+              <div key={dept.id} className="bg-gray-50 rounded-xl p-4">
+                <div className="flex items-center space-x-3 mb-2">
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <svg
+                      className="w-5 h-5 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                      />
+                    </svg>
+                  </div>
+                  <h4 className="font-semibold text-gray-900">{dept.name}</h4>
+                </div>
+                <p className="text-sm text-gray-500">
+                  {dept.description || "Aucune description"}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Room Types Tab */}
+      {activeTab === "roomTypes" && (
+        <div>
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Types de salles
+            </h3>
+            <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium">
+              {roomTypes.length} types
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {roomTypes.map((type) => (
+              <div key={type.id} className="bg-gray-50 rounded-xl p-4">
+                <div className="flex items-center space-x-3 mb-2">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style={{ backgroundColor: type.color + "20" }}
+                  >
+                    <div
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: type.color }}
+                    ></div>
+                  </div>
+                  <h4 className="font-semibold text-gray-900">{type.name}</h4>
+                </div>
+                <p className="text-sm text-gray-500">
+                  {type.description || "Aucune description"}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Equipments Tab */}
+      {activeTab === "equipments" && (
+        <div>
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">Équipements</h3>
+            <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-medium">
+              {equipments.length} équipements
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {equipments.map((equip) => (
+              <div key={equip.id} className="bg-gray-50 rounded-xl p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                    <svg
+                      className="w-5 h-5 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">{equip.name}</h4>
+                    <p className="text-xs text-gray-500">
+                      {equip.description || ""}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Audit Logs Tab */}
+      {activeTab === "audit" && (
+        <div>
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Logs d'audit
+            </h3>
+            <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-medium">
+              Dernières actions
+            </span>
+          </div>
+          {auditLogs.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">Aucun log d'audit</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-600">
+                      Date
+                    </th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-600">
+                      Utilisateur
+                    </th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-600">
+                      Action
+                    </th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-600">
+                      Entité
+                    </th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-600">
+                      IP
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {auditLogs.map((log) => (
+                    <tr
+                      key={log.id}
+                      className="border-b border-gray-100 hover:bg-gray-50"
+                    >
+                      <td className="py-3 px-4 text-sm text-gray-600">
+                        {new Date(log.created_at).toLocaleString("fr-FR")}
+                      </td>
+                      <td className="py-3 px-4 text-sm font-medium text-gray-900">
+                        {log.user_name || "Système"}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            log.action === "CREATE"
+                              ? "bg-green-100 text-green-600"
+                              : log.action === "UPDATE"
+                              ? "bg-blue-100 text-blue-600"
+                              : log.action === "DELETE"
+                              ? "bg-red-100 text-red-600"
+                              : "bg-gray-100 text-gray-600"
+                          }`}
+                        >
+                          {log.action}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-600">
+                        {log.entity_type} #{log.entity_id}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-500">
+                        {log.ip_address || "-"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
     </Layout>
   );
 };
